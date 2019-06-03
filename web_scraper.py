@@ -15,11 +15,8 @@ class WebScraper():
     def execute(self):
         page = self.get_request()
         if page['success'] == True:
-            #print(page['context'].content)
-            soup = self.get_beautiful_soup(page['context'].content)
-            if soup['success'] == True:
-                print(soup['context'].prettify())
-                return soup['context']
+            print(page['context'].content)
+            return page['context'].content
 
     def get_request(self):
         page = requests.get(self.web_url)
@@ -31,17 +28,7 @@ class WebScraper():
             print(outcome)
             return {"success": False, "context":outcome}
 
-    def get_beautiful_soup(self, page_content):
-        try:
-            soup = bs(page_content, 'html.parser')
-            print("Sucessfully made beautiful soup")
-            return {"success":True, "context": soup}
-        except Exception as e:
-            outcome = "Failed to make beautiful soup: {}".format(e)
-            print(outcome)
-            return {"success": False, "context": outcome}
-
-WEB_URL = "https://finances.worldbank.org/Projects/2018-Climate-Investment-Funds-Clean-Technology-Fun/kjmm-jfbk/data"
-#WEB_URL = "https://finances.worldbank.org/resource/kjmm-jfbk.json"
+# World Bank website provides link to API with data set available in json format
+WEB_URL = "https://finances.worldbank.org/resource/kjmm-jfbk.json"
 web_scraper = WebScraper(WEB_URL)
 web_scraper.execute()
