@@ -1,26 +1,40 @@
 from pymongo import MongoClient
-from web_scraper import CTFWebScraper
 
-# Set constants for the database name (DB) and also collection (COLL)
-DB_CLIMATE_INVESTMENT_FUND_2018 = 'climate_investment_fund_2018'
-COLL_CLEAN_TECH_FUNDS = 'clean_tech_funds'
+class Database(object):
+    DATABASE = None
 
-def get_mongo_db(db_name, host ='localhost',
-                 port=27017, username=None, password=None):
-    # make Mongo connection with/out authenication
-    if username and password:
-        mongo_uri = 'mongodb://{}:{}@{}{}'.format(username, password,
-                                                  host, db_name)
-        conn = MongoClient(mongo_uri)
-    else:
-        conn = MongoClient(host, port)
-    return conn[db_name]
+    @staticmethod
+    def initialize(db_name):
+        conn = MongoClient(host ='localhost', port=27017)
+        Database.DATABASE = conn[db_name]
 
-db = get_mongo_db(DB_CLIMATE_INVESTMENT_FUND_2018)
-coll = db[COLL_CLEAN_TECH_FUNDS]
+    @staticmethod
+    def insert(collection, data):
+        Database.DATABASE[collection].insert(data)
 
-# World Bank website provides link to API with data set available in json format
-WEB_URL = "https://finances.worldbank.org/resource/kjmm-jfbk.json"
-ctf_web_scraper = CTFWebScraper(WEB_URL)
-clean_tech_funds = ctf_web_scraper.execute()
-coll.insert_many(clean_tech_funds)
+    @staticmethod
+    def insert_many(collection, data):
+        Database.DATABASE[collection].insert_many(data)
+
+    @staticmethod
+    def find(collection, query):
+        Database.DATABASE[collection].find(query)
+
+    @staticmethod
+    def find_one(collection, query):
+        Database.DATABASE[collection].find_one(query)
+
+    @staticmethod
+    def delete(collection, query):
+        Database.DATABASE[collection].delete(query)
+
+    @staticmethod
+    def delete_id(collection, id):
+        Database.DATABASE[collection].delete_one({"id": id})
+
+
+        
+    
+
+
+

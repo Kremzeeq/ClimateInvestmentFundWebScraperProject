@@ -9,6 +9,9 @@ https://finances.worldbank.org/Projects/2018-Climate-Investment-Funds-Clean-Tech
 """
 import requests
 import ast
+import uuid
+from fields_with_nums import fields_with_nums
+
 class WebScraper():
     def __init__(self, web_url):
         self.web_url = web_url
@@ -35,19 +38,36 @@ class CTFWebScraper(WebScraper):
 
     def execute(self):
         page_content = self.get_page_content()
-        return self.get_list_of_jsons(page_content)
+        decoded =  self.get_list_of_jsons(page_content)
+        return self.clean(decoded)
 
     def get_list_of_jsons(self, page_content):
         #decode bytes to string object
         decoded = page_content.decode('UTF-8')
         # ast.literal_eval evaluates a string object and can return python literal structures
         decoded = ast.literal_eval(decoded)
+        print("Decoded")
         print(decoded)
         print(type(decoded))
         return decoded
 
+    def clean(self, decoded):
+        for doc in decoded:
+            self.update_doc(doc)
+        print("Now cleaned")
+        return decoded
 
+    def update_doc(self, doc):
+        doc = self.convert_string_fields_to_int(doc, fields_with_nums)
+        doc['_id'] = uuid.uuid4().hex
+        doc['year'] = doc.pop('ry')
+        if doc['region'] == "Europe and Central Asisa":
+            doc['region'] = "Europe and Central Asia"
 
+        return doc
 
-
-#{"ry":"2018","project_title":"Concentrated Solar Power Project","country":"Chile","region":"Latin America and Caribbean","public_private":"Private","technology_focus":"Renewable Energy","specific_technology":"RE-Solar","ctf_funding_usd":"67","mdb_1":"IDB","lifetime_where_available":"30","expected_ghg_reductions_lifetime_tco2":"3879000","expected_ghg_reductions_annual_tco2_yr":"129300","expected_co_financing_total_us_m":"0","expected_co_financing_mdb1_us_m":"66","expected_co_financing_govt_us_m":"20","expected_co_financing_pvt_us_m":"130","expected_co_financing_bilateral_us_m":"143","expected_co_financing_others_us_m":"0","expected_installed_capacity_total_mw":"50","expected_installed_capacity_wind_mw":"0","expected_installed_capacity_solar_mw":"50","expected_installed_capacity_hydro_mw":"0","expected_installed_capacity_geothermal_mw":"0","expected_installed_capacity_mixed_mw":"0","expected_additional_passengers_upon_implementation_passengers_per_day":"0","expected_energy_savings_annual_gwh_yr":"0","actual_2015_ghg_reductions_annual_tco2_yr":"0","actual_2015_co_financing_total_us_m":"0","actual_2015_co_financing_mdb1_us_m":"0","actual_2015_co_financing_govt_us_m":"0","actual_2015_co_financing_pvt_us_m":"0","actual_2015_co_financing_bilateral_us_m":"0","actual_2015_co_financing_others_us_m":"0","actual_2015_installed_capacity_total_mw":"0","actual_2015_installed_capacity_wind_mw":"0","actual_2015_installed_capacity_solar_mw":"0","actual_2015_installed_capacity_hydro_mw":"0","actual_2015_installed_capacity_geothermal_mw":"0","actual_2015_installed_capacity_mixed_mw":"0","actual_2015_additional_passengers_upon_implementation_passengers_per_day":"0","actual_2015_energy_savings_annual_gwh_yr":"0","cumulative_ghg_reductions_annual_tco2_yr":"0","cumulative_co_financing_total_us_m":"0","cumulative_co_financing_mdb1_us_m":"0","cumulative_co_financing_govt_us_m":"0","cumulative_co_financing_pvt_us_m":"0","cumulative_co_financing_bilateral_us_m":"0","cumulative_co_financing_others_us_m":"0","cumulative_installed_capacity_total_mw":"0","cumulative_installed_capacity_wind_mw":"0","cumulative_installed_capacity_solar_mw":"0","cumulative_installed_capacity_hydro_mw":"0","cumulative_installed_capacity_geothermal_mw":"0","cumulative_installed_capacity_mixed_mw":"0","cumulative_additional_passengers_upon_implementation_passengers_per_day":"0","cumulative_energy_savings_annual_gwh_yr":"0","fund":"CTF"}
+    def convert_string_fields_to_int(self, doc, fields_with_nums):
+        for k in doc.keys():
+            if k in fields_with_nums:
+                doc[k] = float(doc[k])
+        return doc
