@@ -2,3 +2,5 @@ uuid==1.30
 requests==2.22.0
 pymongo==3.8.0
 pandas==0.24.2
+pip == 19.1.1
+setuptools = 41.0.1
