@@ -10,7 +10,7 @@ https://finances.worldbank.org/Projects/2018-Climate-Investment-Funds-Clean-Tech
 import requests
 import ast
 import uuid
-from fields_with_nums import fields_with_nums
+from src.fields_with_nums import fields_with_nums
 
 class WebScraper():
     def __init__(self, web_url):
@@ -38,17 +38,18 @@ class CTFWebScraper(WebScraper):
 
     def execute(self):
         page_content = self.get_page_content()
-        decoded =  self.get_list_of_jsons(page_content)
+        decoded = self.get_list_of_jsons(page_content)
         return self.clean(decoded)
 
     def get_list_of_jsons(self, page_content):
+        """
+        :param page_content: in bytes and in string format when sourced from api
+        :return: list of jsons converted to unicode
+        """
         #decode bytes to string object
         decoded = page_content.decode('UTF-8')
         # ast.literal_eval evaluates a string object and can return python literal structures
         decoded = ast.literal_eval(decoded)
-        print("Decoded")
-        print(decoded)
-        print(type(decoded))
         return decoded
 
     def clean(self, decoded):
@@ -58,7 +59,7 @@ class CTFWebScraper(WebScraper):
         return decoded
 
     def update_doc(self, doc):
-        doc = self.convert_string_fields_to_int(doc, fields_with_nums)
+        doc = self.convert_string_fields_to_float(doc, fields_with_nums)
         doc['_id'] = uuid.uuid4().hex
         doc['year'] = doc.pop('ry')
         if doc['region'] == "Europe and Central Asisa":
@@ -66,7 +67,12 @@ class CTFWebScraper(WebScraper):
 
         return doc
 
-    def convert_string_fields_to_int(self, doc, fields_with_nums):
+    def convert_string_fields_to_float(self, doc, fields_with_nums):
+        """
+        :param doc: json contains numbers stored as string objects
+        :param fields_with_nums: a list of field names corresponding to docs where numbers are stored as string objects
+        :return: a doc where numbers are stored as floats to preserve teh decimal place
+        """
         for k in doc.keys():
             if k in fields_with_nums:
                 doc[k] = float(doc[k])

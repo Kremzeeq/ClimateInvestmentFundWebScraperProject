@@ -18,11 +18,15 @@ class Database(object):
 
     @staticmethod
     def find(collection, query):
-        Database.DATABASE[collection].find(query)
+        return Database.DATABASE[collection].find(query)
+
+    @staticmethod
+    def find_and_spec_columns(collection, query, columns):
+        return Database.DATABASE[collection].find(query, columns)
 
     @staticmethod
     def find_one(collection, query):
-        Database.DATABASE[collection].find_one(query)
+        return Database.DATABASE[collection].find_one(query)
 
     @staticmethod
     def delete(collection, query):
@@ -31,10 +35,4 @@ class Database(object):
     @staticmethod
     def delete_id(collection, id):
         Database.DATABASE[collection].delete_one({"id": id})
-
-
-        
-    
-
-
 

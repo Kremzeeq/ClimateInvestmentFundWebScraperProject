@@ -1,5 +1,6 @@
-from web_scraper import CTFWebScraper
-from database import Database
+from src.web_scraper import CTFWebScraper
+from src.database import Database
+from src.funding_report_maker import FundingReportMaker
 
 # Set constants for the database name (DB) and also collection (COLL)
 DB_NAME = 'climate_investment_fund_2018'
@@ -16,3 +17,6 @@ Database.initialize(DB_NAME)
 # Insert scraped clean_tech_funds into the database
 Database.insert_many(COLL_CLEAN_TECH_FUNDS, clean_tech_funds)
 
+#Generate Regional Funding Report
+funding_report_maker = FundingReportMaker(Database, COLL_CLEAN_TECH_FUNDS)
+funding_report_maker.execute()
